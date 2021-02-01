@@ -1,0 +1,63 @@
+﻿@page "/Product"
+@using DataLibrary
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@using BlazorServer.Models
+@inject IConfiguration _config 
+<h3>Product</h3>
+<button class="btn btn-primary" @onclick="InsertData">Insert</button>
+<button class="btn btn-warning" @onclick="UpdateData">Update</button>
+<button class="btn btn-danger" @onclick="DeleteData">Update</button>
+
+@if (product == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    @foreach (var p in product)
+    {
+        <p>@p.product_id @p.quantity_in_stock</p>
+    }
+}
+
+@code {        //protected override async Task OnInitializedAsync()
+    //{
+    //    forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+    //}
+
+    List<ProductModel> product;
+
+    private async Task InsertData()
+    {
+
+        string sql = "insert into products (product_id, quantity_in_stock) values (@product_id, @quantity_in_stock);";
+        await _data.SaveData(sql, new { product_id = 13, quantity_in_stock = 27 }, _config.GetConnectionString("default"));
+    }
+    private async Task UpdateData()
+    {
+        string sql = "update products set quantity_in_stock=@quantity_in_stock where product_id=@product_id ";
+        await _data.SaveData(sql, new { product_id = 1, quantity_in_stock = 3 }, _config.GetConnectionString("default"));
+        await OnInitializedAsync();
+    }
+    private async Task DeleteData()
+    {
+        string sql = "delete from products where product_id=@product_id ";
+        await _data.SaveData(sql, new { product_id = 2}, _config.GetConnectionString("default"));
+        await OnInitializedAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from products";
+        product = await _data.LoadData<ProductModel, dynamic>(sql, new { }, _config.GetConnectionString("default"));
+
+    }
+
+
+
+    }
+
+
+}
